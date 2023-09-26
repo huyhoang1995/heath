@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\PostCategory;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator; // Add this line to import the Validator class
 
 
 class PostController extends Controller
@@ -43,7 +43,6 @@ class PostController extends Controller
         PostCategory::insert($postCategories);
 
         return response()->json(['message' => 'Post created successfully']);
-
     }
 
     public function updatePost(Request $request, $id)
@@ -80,7 +79,6 @@ class PostController extends Controller
         PostCategory::where('post_id', $post->id)->delete();
         PostCategory::insert($postCategories);
         return response()->json(['message' => 'Post updated successfully']);
-
     }
 
 
@@ -95,16 +93,12 @@ class PostController extends Controller
                 Post::deleted($id);
                 PostCategory::where('post_id', $id)->delete();
                 return response()->json(['message' => 'Post deleted successfully']);
-
             } else {
                 return response()->json(['message' => 'Can not find Post'], 500);
-
             }
         } catch (\Throwable $th) {
             //throw $th;
         }
-
-
     }
 
     // ...
@@ -124,7 +118,7 @@ class PostController extends Controller
         $perPage = $request->input('perPage', 10); // Default to 10 posts per page, you can adjust this value
 
         try {
-            $posts = Post::with('categories')->paginate($perPage);
+            $posts = Post::with(['categories', 'tags'])->paginate($perPage);
 
             return response()->json(['posts' => $posts], 200);
         } catch (\Throwable $th) {
@@ -138,13 +132,12 @@ class PostController extends Controller
     {
         try {
             //code...
-            $posts = Post::with('categories')->find($id);
+            $posts = Post::with(['categories', 'tags'])->find($id);
 
             return response()->json(['posts' => $posts], 200);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json(['message' => 'Error fetching posts'], 500);
         }
-
     }
 }
